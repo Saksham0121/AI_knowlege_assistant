@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Literal
+from typing import Literal, Optional
 from pydantic import BaseModel, Field
 
 FeedbackType = Literal["positive", "negative"]
@@ -19,5 +19,3 @@ class FeedbackInDB(FeedbackCreate):
     class Config:
         from_attributes = True
 
-
-from typing import Optional
