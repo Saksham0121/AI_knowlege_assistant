@@ -1,5 +1,22 @@
+import os
+from pathlib import Path
 from pydantic_settings import BaseSettings
 from typing import List
+
+# Resolve path to .env file
+# config.py is at: backend/app/core/config.py
+# repo root is 3 levels up: backend/app/core/.. / .. / ..
+current_dir = Path(__file__).resolve().parent
+repo_root = current_dir.parent.parent.parent
+root_env = repo_root / ".env"
+backend_env = current_dir.parent.parent / ".env"
+
+if root_env.exists():
+    env_file_path = str(root_env)
+elif backend_env.exists():
+    env_file_path = str(backend_env)
+else:
+    env_file_path = ".env"
 
 
 class Settings(BaseSettings):
@@ -37,8 +54,9 @@ class Settings(BaseSettings):
         return [o.strip() for o in self.allowed_origins.split(",")]
 
     class Config:
-        env_file = ".env"
+        env_file = env_file_path
         case_sensitive = False
 
 
 settings = Settings()
+
