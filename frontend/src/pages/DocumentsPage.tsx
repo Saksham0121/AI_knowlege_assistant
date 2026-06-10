@@ -194,7 +194,7 @@ export default function DocumentsPage() {
                     {doc.uploaded_by_name && ` · ${doc.uploaded_by_name}`}
                   </span>
                   <div className="flex gap-1">
-                    <a href={`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/documents/${doc.document_id}/download`}
+                    <a href={`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/documents/${doc.document_id}/download?token=${localStorage.getItem('access_token')}`}
                        target="_blank" rel="noreferrer"
                        className="btn btn-ghost btn-sm p-1.5">
                       <Download className="w-3.5 h-3.5" />

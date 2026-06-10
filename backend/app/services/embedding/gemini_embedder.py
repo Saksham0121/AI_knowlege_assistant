@@ -10,7 +10,7 @@ from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
-EMBEDDING_MODEL = "models/text-embedding-004"
+EMBEDDING_MODEL = "models/gemini-embedding-2"
 BATCH_SIZE = 20  # Gemini API batch limit
 MAX_RETRIES = 3
 RETRY_DELAY = 2.0
