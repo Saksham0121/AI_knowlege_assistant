@@ -43,9 +43,10 @@ def _extract_pdf(file_path: str) -> List[Tuple[int, str]]:
 def _extract_docx(file_path: str) -> List[Tuple[int, str]]:
     from docx import Document
     doc = Document(file_path)
-    full_text = "\n".join(para.para for para in doc.paragraphs if para.text.strip())
+    full_text = "\n".join(para.text for para in doc.paragraphs if para.text.strip())
     # DOCX has no natural page breaks — treat as single "page 1"
     return [(1, full_text)] if full_text else []
+
 
 
 def _extract_pptx(file_path: str) -> List[Tuple[int, str]]:
