@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { MessageSquare, FileText, BarChart2, Settings, Brain, Shield } from 'lucide-react';
+import { MessageSquare, FileText, BarChart2, Brain, Shield } from 'lucide-react';
 import { useAuth } from '../../lib/auth';
 import clsx from 'clsx';
 
