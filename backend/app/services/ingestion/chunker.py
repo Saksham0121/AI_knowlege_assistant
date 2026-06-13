@@ -4,7 +4,7 @@ chunk_size=700, chunk_overlap=100
 """
 import uuid
 from typing import List, Tuple
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 import logging
 
 logger = logging.getLogger(__name__)
