@@ -2,19 +2,70 @@ import os
 import uuid
 from datetime import datetime
 from typing import Optional, List
-from fastapi import APIRouter, Depends, File, Form, UploadFile, HTTPException, BackgroundTasks, Query
+from fastapi import APIRouter, Depends, File, Form, UploadFile, HTTPException, BackgroundTasks, Query, Request
 from fastapi.responses import FileResponse
+from bson import ObjectId
 
 from app.core.dependencies import get_current_user, require_manager_or_admin
 from app.core.database import get_database
 from app.models.document import DocumentResponse, DocumentListResponse
 from app.services.ingestion.pipeline import run_ingestion_pipeline
 from app.core.config import settings
+from app.core.security import verify_token
 
 router = APIRouter()
 
 ALLOWED_EXTENSIONS = {".pdf", ".docx", ".pptx", ".txt"}
 MAX_FILE_SIZE = 100 * 1024 * 1024  # 100 MB
+
+
+# (Keep all intermediate routes unchanged, replacing from download_document route onward)
+@router.get("/{document_id}/download")
+async def download_document(
+    document_id: str,
+    request: Request,
+    token: Optional[str] = Query(None),
+    db=Depends(get_database),
+):
+    # Try to get token from header first, then query param
+    auth_header = request.headers.get("Authorization")
+    actual_token = None
+    if auth_header and auth_header.startswith("Bearer "):
+        actual_token = auth_header.split(" ")[1]
+    elif token:
+        actual_token = token
+
+    if not actual_token:
+        raise HTTPException(status_code=401, detail="Authentication credentials missing")
+
+    # Validate token
+    payload = verify_token(actual_token)
+    if not payload or payload.get("type") != "access":
+        raise HTTPException(status_code=401, detail="Invalid or expired access token")
+
+    user_id = payload.get("sub")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    user = await db.users.find_one({"_id": ObjectId(user_id)})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Retrieve document
+    doc = await db.documents.find_one({"document_id": document_id})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    # Enforce department permissions for employee/manager
+    if user.get("role") in ["employee", "manager"] and doc.get("department") != user.get("department"):
+        raise HTTPException(status_code=403, detail="Access denied to this department's documents")
+
+    path = doc.get("storage_path", "")
+    if not os.path.exists(path):
+        raise HTTPException(status_code=404, detail="File not found on disk")
+
+    return FileResponse(path, filename=doc["filename"])
+
 
 
 @router.post("/upload", response_model=DocumentResponse)
@@ -146,16 +197,4 @@ async def delete_document(
     await db.documents.delete_one({"document_id": document_id})
 
 
-@router.get("/{document_id}/download")
-async def download_document(
-    document_id: str,
-    current_user=Depends(get_current_user),
-    db=Depends(get_database),
-):
-    doc = await db.documents.find_one({"document_id": document_id})
-    if not doc:
-        raise HTTPException(status_code=404, detail="Document not found")
-    path = doc.get("storage_path", "")
-    if not os.path.exists(path):
-        raise HTTPException(status_code=404, detail="File not found on disk")
-    return FileResponse(path, filename=doc["filename"])
+
