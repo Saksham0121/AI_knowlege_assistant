@@ -3,20 +3,21 @@ Full ingestion pipeline:
   1. Extract text from document
   2. Clean extracted text
   3. Chunk into overlapping segments
-  4. Generate Gemini embeddings
-  5. Store in ChromaDB
+  4. Convert to LangChain Documents
+  5. Ingest via new RAGAgent
   6. Auto-generate summary/keywords with Gemini
   7. Update document status in MongoDB
 """
 import logging
 import time
+import asyncio
 from datetime import datetime
 from app.services.ingestion.extractor import extract_text
 from app.services.ingestion.cleaner import clean_text
 from app.services.ingestion.chunker import ChunkingEngine
-from app.services.embedding.gemini_embedder import GeminiEmbedder
-from app.services.retrieval.vector_store import VectorStore
-from app.services.generation.summarizer import DocumentSummarizer
+from app.services.rag_agent.summarizer import DocumentSummarizer
+from app.services.rag_agent.agent import RAGAgent
+from langchain_core.documents import Document
 
 logger = logging.getLogger(__name__)
 
@@ -53,16 +54,23 @@ async def run_ingestion_pipeline(
         if not chunks:
             raise ValueError("No text content extracted from document")
 
-        # Step 4: Embed
-        embedder = GeminiEmbedder()
-        texts = [c["text"] for c in chunks]
-        embeddings = await embedder.embed_batch(texts)
-        logger.info(f"  ✅ Generated {len(embeddings)} embeddings")
+        # Step 4: Convert to LangChain Documents
+        lc_docs = []
+        for c in chunks:
+            lc_docs.append(Document(
+                page_content=c["text"],
+                metadata={
+                    "source": filename,
+                    "page": c.get("page", 0),
+                    "chunk_id": c.get("chunk_id", ""),
+                    "department": department,
+                }
+            ))
 
-        # Step 5: Store in ChromaDB
-        vector_store = VectorStore()
-        vector_store.add_chunks(chunks, embeddings, department)
-        logger.info(f"  ✅ Stored in ChromaDB collection: {department}")
+        # Step 5: Ingest via RAGAgent
+        agent = RAGAgent()
+        await asyncio.to_thread(agent.ingest, lc_docs)
+        logger.info(f"  ✅ Ingested into FAISS via RAGAgent")
 
         # Step 6: Auto-summarize
         full_text = "\n\n".join(t for _, t in cleaned_pages[:10])  # first 10 pages

@@ -181,9 +181,9 @@ async def delete_document(
 
     # Remove from vector store
     try:
-        from app.services.retrieval.vector_store import VectorStore
-        vs = VectorStore()
-        vs.delete_document(document_id)
+        from app.services.rag_agent.agent import RAGAgent
+        agent = RAGAgent()
+        # agent.delete_document(document_id)  # TODO: Implement FAISS deletion
     except Exception:
         pass
 

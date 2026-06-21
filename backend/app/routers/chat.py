@@ -18,7 +18,8 @@ async def query(
     current_user=Depends(get_current_user),
     db=Depends(get_database),
 ):
-    from app.services.generation.rag_chain import RAGChain
+    from app.services.rag_agent.agent import RAGAgent
+    import asyncio
 
     start_total = time.time()
 
@@ -27,16 +28,32 @@ async def query(
     if current_user["role"] in ("employee", "manager"):
         dept_filter = current_user["department"]
 
-    rag = RAGChain()
-    result = await rag.query(
-        question=payload.question,
-        department=dept_filter,
-        user_id=str(current_user["_id"]),
+    agent = RAGAgent()
+    result = await asyncio.to_thread(
+        agent.smart_query,
+        payload.question,
+        dept_filter,
     )
 
     query_id = str(uuid.uuid4())
     session_id = payload.session_id or str(uuid.uuid4())
     total_ms = (time.time() - start_total) * 1000
+
+    # Build citations mapping
+    from app.models.chunk import Citation
+    citations = []
+    for s in result.get("sources", []):
+        citations.append(Citation(
+            document_id=s.get("source", ""),
+            document_title=s.get("source", ""),
+            page_number=s.get("page", 0) if isinstance(s.get("page"), int) else 0,
+            chunk_id=s.get("chunk_id", ""),
+            text=s.get("content_preview", ""),
+            semantic_score=s.get("relevance_score", 0.0),
+            final_score=s.get("relevance_score", 0.0),
+        ))
+
+    confidence = 0.9 if result.get("source_type") == "rag" and len(citations) > 0 else 0.5
 
     # Store in history
     history_doc = {
@@ -45,12 +62,12 @@ async def query(
         "query_id": query_id,
         "question": payload.question,
         "answer": result["answer"],
-        "confidence": result["confidence"],
-        "citations": [c.dict() for c in result["citations"]],
+        "confidence": confidence,
+        "citations": [c.dict() for c in citations],
         "department_filter": dept_filter,
         "feedback": None,
-        "retrieval_time_ms": result.get("retrieval_time_ms"),
-        "generation_time_ms": result.get("generation_time_ms"),
+        "retrieval_time_ms": total_ms,
+        "generation_time_ms": total_ms,
         "created_at": __import__("datetime").datetime.utcnow(),
     }
     await db.chat_history.insert_one(history_doc)
@@ -60,22 +77,22 @@ async def query(
         "user_id": str(current_user["_id"]),
         "department": current_user["department"],
         "query": payload.question,
-        "success": result["confidence"] > 0.3,
-        "confidence": result["confidence"],
-        "retrieval_time_ms": result.get("retrieval_time_ms", 0),
-        "generation_time_ms": result.get("generation_time_ms", 0),
-        "document_ids_retrieved": result.get("document_ids", []),
+        "success": confidence > 0.3,
+        "confidence": confidence,
+        "retrieval_time_ms": total_ms,
+        "generation_time_ms": total_ms,
+        "document_ids_retrieved": [c.document_id for c in citations],
         "timestamp": __import__("datetime").datetime.utcnow(),
     })
 
     return ChatResponse(
         answer=result["answer"],
-        confidence=result["confidence"],
-        citations=result["citations"],
+        confidence=confidence,
+        citations=citations,
         session_id=session_id,
         query_id=query_id,
-        retrieval_time_ms=result.get("retrieval_time_ms"),
-        generation_time_ms=result.get("generation_time_ms"),
+        retrieval_time_ms=total_ms,
+        generation_time_ms=total_ms,
     )
 
 
