@@ -166,7 +166,7 @@ export default function ChatPage() {
       {/* Main Chat */}
       <div className="flex flex-col flex-1 min-w-0">
         {/* Toolbar */}
-        <div className="flex items-center gap-2 px-4 py-3 border-b border-glass-border">
+        <div className="flex items-center gap-2 px-5 py-3 border-b border-glass-border bg-surface-100/50">
           <button
             id="toggle-history"
             onClick={() => setShowHistory(!showHistory)}
@@ -175,7 +175,7 @@ export default function ChatPage() {
             <Clock className="w-3.5 h-3.5" /> History
           </button>
           <div className="ml-auto text-xs text-slate-500">
-            Department: <span className="text-slate-300 font-medium">{user?.department}</span>
+            Scoped to <span className="text-slate-300 font-medium">{user?.department}</span>
           </div>
         </div>
 
@@ -183,11 +183,12 @@ export default function ChatPage() {
         <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full gap-8 animate-fade-in">
-              <div className="text-center">
+              <div className="text-center relative z-10">
                 <div className="w-16 h-16 rounded-2xl bg-brand-gradient flex items-center justify-center shadow-glow mx-auto mb-4">
                   <Brain className="w-9 h-9 text-white" />
                 </div>
-                <h2 className="text-xl font-display font-bold text-white mb-2">Ask your Knowledge Base</h2>
+                <p className="text-[10px] tracking-[.18em] uppercase text-brand-600 font-bold mb-2">Knowledge current</p>
+                <h2 className="text-2xl font-display font-bold text-white mb-2">Find the answer. Follow the source.</h2>
                 <p className="text-sm text-slate-400 max-w-md">
                   Ask any question and I'll search through your organization's documents to provide accurate, cited answers.
                 </p>
@@ -329,7 +330,7 @@ export default function ChatPage() {
 
         {/* Input */}
         <div className="px-4 py-4 border-t border-glass-border">
-          <div className="glass-card p-2 flex items-end gap-2">
+          <div className="p-2 flex items-end gap-2 bg-surface-100/55 rounded-xl">
             <textarea
               ref={inputRef}
               id="chat-input"
@@ -351,7 +352,7 @@ export default function ChatPage() {
             </button>
           </div>
           <p className="text-xs text-slate-600 mt-2 text-center">
-            Answers grounded in your knowledge base • Shift+Enter for new line
+            Grounded in your workspace · Shift + Enter for a new line
           </p>
         </div>
       </div>

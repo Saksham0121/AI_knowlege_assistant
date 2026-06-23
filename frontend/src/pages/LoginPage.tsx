@@ -27,7 +27,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen mesh-bg flex items-center justify-center p-4">
+    <div className="min-h-screen mesh-bg knowledge-current flex items-center justify-center p-4">
       {/* Background glow */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl" />
@@ -41,13 +41,15 @@ export default function LoginPage() {
           </div>
           <div>
             <h1 className="font-display font-bold text-2xl text-white">InsightFlow AI</h1>
-            <p className="text-xs text-brand-400">Enterprise Knowledge Assistant</p>
+            <p className="text-[10px] tracking-[.16em] uppercase text-brand-600 font-bold mt-1">Enterprise knowledge assistant</p>
           </div>
         </div>
 
         {/* Card */}
-        <div className="glass-card p-8">
-          <h2 className="text-xl font-display font-bold text-white mb-1">Sign in</h2>
+        <div className="glass-card p-8 relative overflow-hidden">
+          <div className="absolute top-0 left-8 right-8 h-px bg-brand-300" />
+          <p className="text-[10px] tracking-[.16em] uppercase text-brand-600 font-bold mb-3">Your workspace</p>
+          <h2 className="text-xl font-display font-bold text-white mb-1">Welcome back</h2>
           <p className="text-sm text-slate-400 mb-6">Access your organization's knowledge base</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -113,7 +115,7 @@ export default function LoginPage() {
         </div>
 
         <p className="text-center text-xs text-slate-600 mt-6">
-          Powered by Gemini AI + RAG technology
+          Private answers, traceable sources
         </p>
       </div>
     </div>

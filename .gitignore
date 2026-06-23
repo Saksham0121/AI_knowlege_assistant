@@ -24,6 +24,7 @@ dist/
 # Storage
 backend/storage/
 backend/chroma_data/
+backend/vectorstore/
 
 # IDE
 .vscode/
