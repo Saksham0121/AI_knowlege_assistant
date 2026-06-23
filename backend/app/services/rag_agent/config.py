@@ -60,11 +60,11 @@ class RAGConfig:
 
     # ---- Gemini API Configuration ----
     gemini_api_key: str = ""
-    gemini_model_name: str = "gemini-1.5-flash"
-    embed_model_name: str = "models/text-embedding-004"
+    gemini_model_name: str = "models/gemini-2.5-flash"
+    embed_model_name: str = "all-MiniLM-L6-v2"
 
     # Reranker
-    reranker_model_name: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+    reranker_model_name: str = "BAAI/bge-reranker-base"
 
     # FAISS
     faiss_index_path: str = "./vectorstore"

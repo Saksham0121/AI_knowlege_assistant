@@ -314,7 +314,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 # Start the FastAPI server on http://localhost:8000
-uvicorn app.main:app --reload
+uvicorn main:app --reload
 ```
 
 ### 3. Frontend Setup

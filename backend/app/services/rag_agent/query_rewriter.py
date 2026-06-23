@@ -29,7 +29,7 @@ User Query:
 def rewrite_query(
     query: str,
     gemini_api_key: str,
-    model_name: str = "gemini-1.5-flash",
+    model_name: str = "models/gemini-2.5-flash",
     **kwargs,
 ) -> str:
     """Rewrite a user query using Gemini LLM for better retrieval.

@@ -36,7 +36,7 @@ Return ONLY a valid JSON object with this exact structure:
 class DocumentSummarizer:
     def __init__(self):
         genai.configure(api_key=settings.gemini_api_key)
-        self.model = genai.GenerativeModel("gemini-1.5-flash")
+        self.model = genai.GenerativeModel("models/gemini-2.5-flash")
 
     async def summarize(self, text: str, title: str) -> Dict[str, Any]:
         """

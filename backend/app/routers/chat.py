@@ -45,12 +45,12 @@ async def query(
     for s in result.get("sources", []):
         citations.append(Citation(
             document_id=s.get("source", ""),
-            document_title=s.get("source", ""),
-            page_number=s.get("page", 0) if isinstance(s.get("page"), int) else 0,
+            document=s.get("source", ""),
+            title=s.get("source", ""),
+            page=s.get("page", 0) if isinstance(s.get("page"), int) else 0,
             chunk_id=s.get("chunk_id", ""),
-            text=s.get("content_preview", ""),
-            semantic_score=s.get("relevance_score", 0.0),
-            final_score=s.get("relevance_score", 0.0),
+            excerpt=s.get("content_preview", ""),
+            relevance_score=s.get("relevance_score", 0.0),
         ))
 
     confidence = 0.9 if result.get("source_type") == "rag" and len(citations) > 0 else 0.5

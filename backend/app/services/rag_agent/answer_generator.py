@@ -38,7 +38,7 @@ def generate_answer(
     query: str,
     context: str,
     gemini_api_key: str,
-    model_name: str = "gemini-1.5-flash",
+    model_name: str = "models/gemini-2.5-flash",
     temperature: float = 0.0,
 ) -> str:
     """Generate an answer from retrieved context using Gemini API.
